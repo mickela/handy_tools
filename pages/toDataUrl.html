@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Convert image to Data Url</title>
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+    <nav>
+        <div class="nav-wrapper">
+            <a class="brand-logo center">toDataUrl</a>
+        </div>
+    </nav>
+    <div class="container">
+        <label class="btn btn-info file-picker" >
+            Choose file
+            <input type="file" name="" id="fileInp" style="display: none;" />
+        </label>
+
+        <div class="holder">
+            <button id="copy">copy</button>
+            <textarea rows="30" cols="10" class="data"></textarea>
+        </div>
+    </div>
+
+    <script>
+        const $ = selector => document.querySelector(selector);
+
+        $('#fileInp').addEventListener('change', (e)=>{
+            const { files } = e.target;
+            
+            let file = files[0];
+            const reader = new FileReader();
+
+            if(file) reader.onload = ({ target: { result } }) => $('.data').innerText = result;
+
+            reader.readAsDataURL(file);
+        })
+
+
+        $('#copy').addEventListener('click', ()=>{
+            let result = $('.data').innerText;
+
+            const textarea = document.createElement('textarea');
+            textarea.innerText = result;
+            document.body.appendChild(textarea);
+
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert('copied data url to clipboard!')
+
+        });
+    </script>
+</body>
+</html>
