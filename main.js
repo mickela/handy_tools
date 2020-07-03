@@ -1,42 +1,41 @@
 const electron = require('electron');
 const url = require('url');
 const path = require('path');
+const fs = require('fs');
+const { webContents } = require('electron');
 
 const { app, BrowserWindow, Menu, ipcMain } = electron;
 
-// set environment
-process.env.NODE_ENV = 'production';
+process.env.NODE_ENV = 'development';
 
 let mainWindow;
 let addWindow;
+const todoStorage = './storage/todos.json';
 
-// listen for app to be ready
 app.on('ready', function(){
-    // Create new window
     mainWindow = new BrowserWindow({
         webPreferences: {
             nodeIntegration: true
         }
     });
 
-    // load html into window
     mainWindow.loadURL(url.format({
         pathname: path.join(__dirname, 'mainWindow.html'),
         protocol: 'file:',
         slashes: true
     }));
-    // quit app when closed
+
+    mainWindow.once('ready-to-show', ()=> mainWindow.show());
+
     mainWindow.on('closed', function(){
         app.quit();
     })
-
-    // build menu from template
     const mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
-    // insert menu
     Menu.setApplicationMenu(mainMenu);
 });
 
-// HANDLE ADD WINDOW
+app.allowRendererProcessReuse = true;
+
 function createAddWindow(){
     addWindow = new BrowserWindow({
         width: 300,
@@ -60,28 +59,68 @@ function createAddWindow(){
 
 }
 
-// catch item:add
+const readFileToJson = (path) => JSON.parse(fs.readFileSync(path));
+
+
+const fetchTodos = exports.fetchTodos = () => readFileToJson(todoStorage);
+
+
+const newTodo = exports.newTodo = async (data) =>{
+    const todos = fetchTodos();
+
+    data.id = todos.length;
+    todos.push(data);
+    
+    fs.writeFileSync(todoStorage, JSON.stringify(todos), (err)=>{console.log(err)});
+}
+
+const deleteTodo = exports.deleteTodo = (id) =>{
+    const todos = fetchTodos();
+
+    let newlist = todos.filter(item => item.id !== parseInt(id));
+
+    fs.writeFileSync(todoStorage, JSON.stringify(newlist), (err)=> conosle.log(err));
+}
+
 ipcMain.on('item:add', function(e, item){
     mainWindow.webContents.send('item:add', item);
     addWindow.close();
 })
 
-// create menu template
+const loadPage  = (filename) =>{
+    mainWindow.loadURL(url.format({
+        pathname: path.join(__dirname, filename),
+        protocol: 'file:',
+        slashes: true
+    }));
+}
+
 const mainMenuTemplate = [
     {
-        label: 'File',
+        label: 'Pages',
         submenu: [
             {
-                label: 'Add item',
-                accelerator: process.platform == 'darwin' ? 'Command+N' : 'Ctrl+N',
+                label: 'Home',
                 click(){
-                    createAddWindow(); 
+                    loadPage('mainWindow.html');
                 }
             },
             {
-                label: 'Clear items',
+                label: 'toDataUrl',
                 click(){
-                    mainWindow.webContents.send('item:clear');
+                    loadPage('./pages/toDataUrl.html');
+                }
+            },
+            {
+                label: 'Todo list',
+                click(){
+                    loadPage('./pages/todo.html');
+                }
+            },
+            {
+                label: 'About',
+                click(){
+                    loadPage('./pages/about.html');
                 }
             },
             {
@@ -99,7 +138,6 @@ if(process.platform == 'darwin'){
     mainMenuTemplate.unshift({});
 }
 
-// Add devTools item if not in production
 if(process.env.NODE_ENV !== 'production'){
     mainMenuTemplate.push({
         label: 'DevTools',

@@ -3,11 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todo</title>
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="assets/css/style.css" />
+    <title>Tools &middot; Todo</title>
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../assets/css/style.css" />
 </head>
-<body>
-    todo page
+<body class="">
+    <header class="bg-light mb-5 shadow-sm" style="position: fixed; display: block; z-index: 999; width: 100%; top: 0; padding: 3rem;">
+        <h3 class="text-center text-monospace">Todo-list</h3>
+        <form id="form">
+            <input type="text" id="input" placeholder="new todo" class="form-control" />
+        </form>
+    </header>
+    
+    <div class="container my-5">
+        <div class="my-5 border-2" id="to-do-list" style="padding-top: 8.5rem;"></div>
+    </div>
+
+    <script>
+        const { remote, ipcRenderer, shell } = require('electron');
+        const mainProcess = remote.require('./main.js');
+        
+        const $ = selector => document.querySelector(selector);
+        const $A = selector => document.querySelectorAll(selector);
+
+        ['dragstart', 'dragover', 'dragleave', 'drop'].forEach(event =>{
+            document.addEventListener(event, e => e.preventDefault());
+        });
+
+        const form = $("#form");
+        
+        function renderTodos(){
+            const todos = mainProcess.fetchTodos();
+            $("#to-do-list").innerHTML = "";
+
+            todos.forEach(todo =>{
+    
+                const el = document.createElement('div');
+                el.className = "alert alert-warning alert-dismissible fade show";
+                el.setAttribute('role', 'alert');
+                el.innerHTML = `
+                    ${todo.todo}
+                    <button id=${todo.id} type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                `;
+    
+                $("#to-do-list").appendChild(el);
+            })
+
+            $A(".close").forEach(btn =>{
+                btn.addEventListener('click', (e)=>{
+                    let { id, parentNode } = btn;
+                    console.log(parentNode);
+                    console.log(id);
+                    mainProcess.deleteTodo(id);
+                    renderTodos();
+                })
+            })
+        }
+
+        renderTodos();
+
+        form.addEventListener('submit', (e) =>{
+            e.preventDefault();
+
+            const input = $("#input");
+
+            if(input.value.length > 0){
+                const todoData = {id: 0, todo: input.value};
+    
+                mainProcess.newTodo(todoData);
+                renderTodos();
+                input.value = "";
+
+            }else{
+                const ourAlert = newAlert("Please enter some value!", "danger");
+                form.insertBefore(ourAlert, input);
+                setTimeout(()=> form.removeChild(ourAlert), 3000);
+            }
+
+        })
+
+        function newAlert (msg, bg){
+            const div = document.createElement('div');
+            div.className = `alert alert-${bg}`;
+            div.innerText = msg;
+            return div;
+        }
+        
+    </script>
 </body>
 </html>
