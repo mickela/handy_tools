@@ -8,15 +8,65 @@
     <link rel="stylesheet" href="../assets/css/style.css" />
 </head>
 <body class="">
-    <header class="bg-light mb-5 shadow-sm" style="position: fixed; display: block; z-index: 999; width: 100%; top: 0; padding: 3rem;">
+    <style>
+        .color{color: transparent;}
+    </style>
+    <header class="bg-light mb-5 shadow-sm" style="position: fixed; display: block; z-index: 999; width: 100%; top: 0; padding: 2rem;">
         <h3 class="text-center text-monospace">Todo-list</h3>
         <form id="form">
             <input type="text" id="input" placeholder="new todo" class="form-control" />
+            <div class="mt-3 form-group">
+                <span class="badge bg-secondary">Theme:</span>  &nbsp;&nbsp;&nbsp;
+
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="theme" id="primary" value="primary" checked/>
+                    <label class="form-check-label" for="primary">
+                        <span class="badge bg-primary color">.</span>
+                    </label>
+                </div>
+                
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="theme" id="info" value="info"/>
+                    <label class="form-check-label" for="info">
+                        <span class="badge bg-info color">.</span>
+                    </label>
+                </div>
+
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="theme" id="dark" value="dark"/>
+                    <label class="form-check-label" for="dark">
+                        <span class="badge bg-dark color">.</span>
+                    </label>
+                </div>
+                
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="theme" id="secondary" value="secondary"/>
+                    <label class="form-check-label" for="secondary">
+                        <span class="badge bg-secondary color">.</span>
+                    </label>
+                </div>
+
+                                
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="theme" id="danger" value="danger"/>
+                    <label class="form-check-label" for="danger">
+                        <span class="badge bg-danger color">.</span>
+                    </label>
+                </div>
+                                
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="theme" id="warning" value="warning"/>
+                    <label class="form-check-label" for="warning">
+                        <span class="badge bg-warning color">.</span>
+                    </label>
+                </div>
+
+            </div>
         </form>
     </header>
     
     <div class="container my-5">
-        <div class="my-5 border-2" id="to-do-list" style="padding-top: 8.5rem;"></div>
+        <div class="my-5 border-2" id="to-do-list" style="padding-top: 9.5rem;"></div>
     </div>
 
     <script>
@@ -31,6 +81,9 @@
         });
 
         const form = $("#form");
+        let theme = 'primary';
+
+        $A("input[type='radio']").forEach(ipt => ipt.addEventListener('click', ()=> theme = ipt.value));
         
         function renderTodos(){
             const todos = mainProcess.fetchTodos();
@@ -39,7 +92,7 @@
             todos.forEach(todo =>{
     
                 const el = document.createElement('div');
-                el.className = "alert alert-warning alert-dismissible fade show";
+                el.className = `alert alert-${todo.theme ? todo.theme : 'primary' } alert-dismissible fade show`;
                 el.setAttribute('role', 'alert');
                 el.innerHTML = `
                     ${todo.todo}
@@ -50,6 +103,12 @@
     
                 $("#to-do-list").appendChild(el);
             })
+
+            if(todos.length < 1){
+                const el = document.createElement('h1');
+                el.innerText = "Create new todo";
+                $("#to-do-list").appendChild(el);
+            }
 
             $A(".close").forEach(btn =>{
                 btn.addEventListener('click', (e)=>{
@@ -70,7 +129,7 @@
             const input = $("#input");
 
             if(input.value.length > 0){
-                const todoData = {id: 0, todo: input.value};
+                const todoData = {id: 0, todo: input.value, theme: theme};
     
                 mainProcess.newTodo(todoData);
                 renderTodos();
