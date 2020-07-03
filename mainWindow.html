@@ -2,82 +2,19 @@
 <html lang="en">
 <head>
     <title>Tools</title>
-    <link rel="stylesheet" href="materialize.css"/>
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="assets/css/style.css" />
 </head>
-<body>
-    <nav>
-        <div class="nav-wrapper">
-            <a class="brand-logo center">toDataUrl</a>
-        </div>
-    </nav>
-    <div class="container">
-        <label class="btn btn-info file-picker" >
-            Choose file
-            <input type="file" name="" id="fileInp" style="display: none;" />
-        </label>
+<body class="bg-light">
+    <div class="container my-5">
+        <h3 class="text-center mb-3">Menu</h3>
 
-        <div class="holder">
-            <button id="copy">copy</button>
-            <p class="data"></p>
-        </div>
+        <div class="list-group">
+            <a href="./pages/toDataUrl.html" class="list-group-item list-group-item-action">toDataUrl</a>
+            <a href="./pages/todo.html" class="list-group-item list-group-item-action">To-do list</a>
+            <a href="" class="list-group-item list-group-item-action">Another link</a>
+          </div>
+
     </div>
-
-    <script>
-        // const electron = require('electron');
-        // const { ipcRenderer } = electron;
-        // const ul = document.querySelector('ul');
-
-        // ipcRenderer.on('item:add', function(e, item){
-        //     const li = document.createElement('li');
-        //     console.log(item)
-        //     const itemText = document.createTextNode(item);
-        //     li.appendChild(itemText);
-        //     ul.appendChild(li);
-        //     li.className = 'collection-item';
-        //     ul.className = 'collection';
-        // })
-        // ipcRenderer.on('item:clear', function(e){
-        //     ul.innerHTML = '';
-        //     ul.className = "";
-        // })
-
-        // // remove item
-        // ul.addEventListener('dblclick', removeItem);
-
-        // function removeItem(e){
-        //     e.target.remove();
-        //     if(ul.children.length == 0){
-        //         ul.className = "";
-        //     }
-        // }
-
-        const $ = selector => document.querySelector(selector);
-
-        $('#fileInp').addEventListener('change', (e)=>{
-            const { files } = e.target;
-            
-            let file = files[0];
-            const reader = new FileReader();
-
-            if(file) reader.onload = ({ target: { result } }) => $('.data').innerText = result;
-
-            reader.readAsDataURL(file);
-        })
-
-
-        $('#copy').addEventListener('click', ()=>{
-            let result = $('.data').innerText;
-
-            const textarea = document.createElement('textarea');
-            textarea.innerText = result;
-            document.body.appendChild(textarea);
-
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            alert('copied data url to clipboard!')
-
-        });
-    </script>
 </body>
 </html>
