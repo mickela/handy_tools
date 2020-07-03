@@ -59,6 +59,16 @@ function createAddWindow(){
 
 }
 
+if (!fs.existsSync(todoStorage)) {
+    try {
+        fs.mkdirSync('storage');
+        fs.writeFileSync(todoStorage, JSON.stringify([]));
+    } catch (error) {
+        console.error(`The path '${todoStorage}' specified for --todo-storage-directory does not seem to exist or cannot be created.`);
+        app.exit(1);
+    }
+}
+
 const readFileToJson = (path) => JSON.parse(fs.readFileSync(path));
 
 
